@@ -38,8 +38,9 @@ const extractSession = (
   }
 
   if (grantScope.includes("profile")) {
-    if (identity.traits.username) {
-      session.id_token.preferred_username = identity.traits.username
+    if (identity.traits.preferred_username) {
+      session.id_token.preferred_username = identity.traits.preferred_username
+      session.id_token.nickname = identity.traits.nickname
     }
 
     if (identity.traits.website) {
@@ -57,12 +58,37 @@ const extractSession = (
       session.id_token.name = identity.traits.name
     }
 
+    if (identity.traits.given_name) {
+        session.id_token.given_name = identity.traits.given_name
+    }
+    if (identity.traits.family_name) {
+        session.id_token.family_name = identity.traits.family_name
+    }
+    if (identity.traits.picture) {
+        session.id_token.picture = identity.traits.picture
+    }
+
     if (identity.updated_at) {
       session.id_token.updated_at = parseInt(
         (Date.parse(identity.updated_at) / 1000).toFixed(0),
       )
     }
   }
+
+  if (grantScope.includes("groups")) {
+      const groups = identity.traits.groups || []
+      if (groups.length > 0) {
+          session.id_token.groups = groups
+      }
+  }
+
+  if (grantScope.includes("roles")) {
+    const roles = identity.traits.groups || []
+    if (roles.length > 0) {
+       session.id_token.roles = roles
+    }
+  }
+
   return session
 }
 
