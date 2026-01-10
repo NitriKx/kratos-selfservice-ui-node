@@ -59,13 +59,38 @@ const extractSession = (
     }
 
     if (identity.traits.given_name) {
-        session.id_token.given_name = identity.traits.given_name
+      session.id_token.given_name = identity.traits.given_name
     }
     if (identity.traits.family_name) {
-        session.id_token.family_name = identity.traits.family_name
+      session.id_token.family_name = identity.traits.family_name
     }
-    if (identity.traits.picture) {
-        session.id_token.picture = identity.traits.picture
+    if (identity.traits.pronouns) {
+      session.id_token.pronouns = identity.traits.pronouns
+    }
+
+    if (identity.traits.locale)
+      session.id_token.locale = identity.traits.locale
+    if (identity.traits.birthdate)
+      session.id_token.birthdate = identity.traits.birthdate
+    if (identity.traits.picture)
+      session.id_token.picture = identity.traits.picture
+    
+    // --- Scope: Phone (Standard OIDC) ---
+    // Souvent inclus dans profile, mais plus propre de le séparer ou de checker les deux
+    if (grantScope.includes("phone") || grantScope.includes("profile")) {
+      if (identity.traits.phone_number) {
+        session.id_token.phone_number = identity.traits.phone_number
+        // Si tu gères la verif SMS via Kratos, tu devras checker verifiable_addresses comme pour l'email
+        session.id_token.phone_number_verified = true 
+      }
+    }
+
+    // --- Scope: Address (Standard OIDC) ---
+    if (grantScope.includes("address") || grantScope.includes("profile")) {
+      if (identity.traits.address) {
+        // Si ton schema Kratos match la structure OIDC, c'est un mapping direct
+        session.id_token.address = identity.traits.address
+      }
     }
 
     if (identity.updated_at) {
@@ -76,16 +101,16 @@ const extractSession = (
   }
 
   if (grantScope.includes("groups")) {
-      const groups = identity.traits.groups || []
-      if (groups.length > 0) {
-          session.id_token.groups = groups
-      }
+    const groups = identity.traits.groups || []
+    if (groups.length > 0) {
+      session.id_token.groups = groups
+    }
   }
 
   if (grantScope.includes("roles")) {
     const roles = identity.traits.groups || []
     if (roles.length > 0) {
-       session.id_token.roles = roles
+      session.id_token.roles = roles
     }
   }
 
